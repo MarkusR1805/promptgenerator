@@ -27,7 +27,7 @@ idna==3.10
 ollama==0.3.3
 sniffio==1.3.1
 
-<h1>The program is currently running in the terminal. But it will soon have a GUI!</h1>
+<h1>The program is currently running in the terminal.<br>But it will soon have a GUI!</h1>
 
 <h2>Programm start</h2>
 
