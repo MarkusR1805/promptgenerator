@@ -17,6 +17,17 @@ cd promptgenerator
 ```sh
 pip install -r requirements.txt
 ```
+These Python libraries should be installed!
+anyio==4.6.2.post1
+certifi==2024.8.30
+h11==0.14.0
+httpcore==1.0.6
+httpx==0.27.2
+idna==3.10
+ollama==0.3.3
+sniffio==1.3.1
+
+<h1>The program is currently running in the terminal. But it will soon have a GUI!</h1>
 
 <h2>Programm start</h2>
 
