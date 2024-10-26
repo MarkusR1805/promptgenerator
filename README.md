@@ -1,6 +1,6 @@
 <h1>Promptgenerator with Ollama</h1>
 Install Ollama
-```sh
+``
 http://ollama.com
 ``
 
@@ -8,19 +8,19 @@ http://ollama.com
 
 <h2>Create python venv</h2>
 
-```sh
+``
 python -m venv promptgenerator
 source promptgenerator/bin/activate
 cd promptgenerator
-```
+``
 
-```sh
+``
 pip install -r requirements.txt
-```
+``
 
 <h2>Programm start</h2>
 
-```sh
+``
 python main.py
-```
+``
 
