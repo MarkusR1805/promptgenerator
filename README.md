@@ -24,4 +24,4 @@ pip install -r requirements.txt
 python main.py
 ```
 
-![Promptgenerator](https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/26f2122f-6738-45e1-bcf9-0e62f281622c/width=700,original=false/2024-10-26-174314.jpeg)
+![Promptgenerator](https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/26f2122f-6738-45e1-bcf9-0e62f281622c/original=true,quality=90/36686347.jpeg)
