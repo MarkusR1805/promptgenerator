@@ -1,0 +1,1 @@
+Create only one prompt for text to image, without preface and comment or tips at the end, and without quotation marks, ending the prompt with a period!
