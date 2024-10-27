@@ -1,4 +1,5 @@
 <h1>Promptgenerator with Ollama</h1>
+<h2>This program now has a GUI with a button for the clipboard.</h2>
 
 Install Ollama
 <http://ollama.com>
@@ -39,9 +40,6 @@ These Python libraries should be installed!
 - idna==3.10
 - ollama==0.3.3
 - sniffio==1.3.1
-
-<h2>The program is currently running in the terminal.</h2><br>
-***But it will soon have a GUI!***
 
 <h2>Programm start</h2>
 
