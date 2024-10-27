@@ -4,6 +4,13 @@
 Install Ollama
 <http://ollama.com>
 
+My Favorite LLM for this program<br>
+llama3.2:3b
+
+```sh
+ollama pull llama3.2
+```
+
 Install Git
 <https://git-scm.com/downloads>
 
