@@ -37,7 +37,7 @@ These Python libraries should be installed!
 - ollama==0.3.3
 - sniffio==1.3.1
 
-<h2>The program is currently running in the terminal.<br>But it will soon have a GUI!</h2>
+<h2>The program is currently running in the terminal.<br>**But it will soon have a GUI!**</h2>
 
 <h2>Programm start</h2>
 
