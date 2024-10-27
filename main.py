@@ -8,7 +8,7 @@ import re
 import tempfile
 import shutil
 import logging
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QTextEdit, QComboBox, QMessageBox
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QTextEdit, QComboBox, QMessageBox, QDialog, QDialogButtonBox
 from PyQt6.QtGui import QClipboard
 
 # Logging konfigurieren
@@ -112,13 +112,35 @@ def clean_csv(file_path):
     except Exception as e:
         logging.error(f"Fehler bei der Bereinigung der CSV-Datei '{file_path}': {e}")
 
+class PromptEditDialog(QDialog):
+    def __init__(self, prompt):
+        super().__init__()
+        self.setWindowTitle("Prompt bearbeiten")
+        self.prompt = prompt
+        self.initUI()
+
+    def initUI(self):
+        layout = QVBoxLayout()
+        self.text_edit = QTextEdit()
+        self.text_edit.setPlainText(self.prompt)
+        layout.addWidget(self.text_edit)
+
+        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
+        layout.addWidget(button_box)
+        self.setLayout(layout)
+
+    def get_edited_prompt(self):
+        return self.text_edit.toPlainText()
+
 class App(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
 
     def initUI(self):
-        self.setWindowTitle('Text Generation with Ollama')
+        self.setWindowTitle('Promptgenerator 2.2 / 2024 | by Der Zerfleischer')
         self.setGeometry(100, 100, 600, 400)
 
         layout = QVBoxLayout()
@@ -190,10 +212,13 @@ class App(QWidget):
                 generated_text = response['response'].strip()
                 self.generated_text_edit.setPlainText(generated_text)
 
-                date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                save_to_csv('prompts.csv', date, user_input, selected_model, generated_text)
-                append_to_prompt_txt(generated_text)
-                clean_csv('prompts.csv')
+                dlg = PromptEditDialog(generated_text)
+                if dlg.exec():
+                    edited_prompt = dlg.get_edited_prompt()
+                    date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    save_to_csv('prompts.csv', date, user_input, selected_model, edited_prompt)
+                    append_to_prompt_txt(edited_prompt)
+                    clean_csv('prompts.csv')
             else:
                 QMessageBox.critical(self, 'Fehler', 'Die Antwort enthält kein \'response\'-Feld.')
         except Exception as e:
