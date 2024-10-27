@@ -10,7 +10,7 @@ Install Git
 Install Python
 <https://www.python.org/downloads/>
 
-Clone Repository
+<h2>Clone Repository</h2>
 ```sh
 git clone https://github.com/MarkusR1805/promptgenerator.git
 ```
