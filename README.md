@@ -38,7 +38,7 @@ These Python libraries should be installed!
 - sniffio==1.3.1
 
 <h2>The program is currently running in the terminal.</h2><br>
-**But it will soon have a GUI!**
+***But it will soon have a GUI!***
 
 <h2>Programm start</h2>
 
