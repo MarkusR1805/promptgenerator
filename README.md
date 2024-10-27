@@ -33,7 +33,7 @@ If the program does not start or an error message appears, be sure to execute th
 pip install -r requirements.txt
 ```
 
-> #### Troubleshooting
+> # Troubleshooting
 
 > If an installation does not work for whatever reason, but you have installed Python, you have the following option:
 > - start your terminal and type the following: cd
