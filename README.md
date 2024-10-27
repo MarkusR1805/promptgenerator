@@ -24,6 +24,9 @@ source promptgenerator/bin/activate
 cd promptgenerator
 ```
 
+<h1>Attention, very important!</h1>
+If the program does not start or an error message appears, be sure to execute the requirements.txt.
+
 ```sh
 pip install -r requirements.txt
 ```
