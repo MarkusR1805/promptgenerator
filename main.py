@@ -1,13 +1,15 @@
+import sys
 import random
-import ollama
-import os
 import subprocess
+import os
 import csv
 from datetime import datetime
 import re
 import tempfile
 import shutil
 import logging
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QTextEdit, QComboBox, QMessageBox
+from PyQt6.QtGui import QClipboard
 
 # Logging konfigurieren
 logging.basicConfig(
@@ -16,12 +18,14 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-# Funktion zum Einlesen der Anweisungen aus der Datei
+# Importieren der ollama-Bibliothek
+import ollama
+
+# Funktionen aus dem ursprünglichen Skript
 def read_anweisungen(file_path):
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
             content = file.read()
-        # Anweisungen nach doppelten Leerzeilen trennen und strippen
         anweisungen = [anweisung.strip() for anweisung in content.split('\n\n') if anweisung.strip()]
         logging.info(f"Anweisungen aus '{file_path}' erfolgreich eingelesen.")
         return anweisungen
@@ -29,26 +33,17 @@ def read_anweisungen(file_path):
         logging.error(f"Die Datei '{file_path}' wurde nicht gefunden.")
         return []
 
-# Funktion zum Speichern der Daten in die CSV-Datei mit DictWriter
 def save_to_csv(file_path, date, begriffe, model, prompt):
-    # Überprüfen, ob die Datei bereits existiert
     file_exists = os.path.isfile(file_path)
-
     try:
         with open(file_path, 'a', newline='', encoding='utf-8') as csvfile:
             fieldnames = ["Datum", "Begriffe", "Modell", "Prompt"]
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-
-            # Wenn die Datei nicht existiert, Spaltenüberschriften hinzufügen
             if not file_exists:
                 writer.writeheader()
                 logging.info(f"Spaltenüberschriften in '{file_path}' hinzugefügt.")
-
-            # Sonderzeichen und Zeilenumbrüche aus dem Prompt entfernen
-            prompt = re.sub(r'[^\x00-\x7F]+||:', '', prompt)  # Entfernt nicht ASCII Zeichen und Doppelpunkte
-            prompt = prompt.replace('\n', ' ').strip()  # Entfernt Zeilenumbrüche und führende Leerzeichen
-
-            # Datenzeile schreiben
+            prompt = re.sub(r'[^\x00-\x7F]+||:', '', prompt)
+            prompt = prompt.replace('\n', ' ').strip()
             writer.writerow({
                 "Datum": date,
                 "Begriffe": begriffe,
@@ -59,7 +54,6 @@ def save_to_csv(file_path, date, begriffe, model, prompt):
     except Exception as e:
         logging.error(f"Fehler beim Schreiben in '{file_path}': {e}")
 
-# Funktion zur Abfrage der installierten Modelle über die Ollama CLI
 def get_installed_models():
     try:
         result = subprocess.run(
@@ -72,15 +66,9 @@ def get_installed_models():
         lines = result.stdout.strip().split('\n')
         if len(lines) <= 1:
             logging.warning("Keine Modelle gefunden.")
-            return {}  # Keine Modelle gefunden
-
-        models = lines[1:]  # Überspringe die Kopfzeile
-        model_dict = {}
-        for i, model_line in enumerate(models):
-            # Annahme: Der Modellname ist das erste Wort in der Zeile
-            model_name = model_line.split()[0]
-            model_dict[str(i + 1)] = model_name
-
+            return {}
+        models = lines[1:]
+        model_dict = {str(i + 1): model_line.split()[0] for i, model_line in enumerate(models)}
         logging.info(f"{len(model_dict)} Modelle gefunden.")
         return model_dict
     except subprocess.CalledProcessError as e:
@@ -90,35 +78,17 @@ def get_installed_models():
         logging.error(f"Unbekannter Fehler beim Abrufen der Modelle: {e}")
         return {}
 
-# Funktion zum Anhängen des Prompts an prompt.txt
 def append_to_prompt_txt(prompt, file_path='prompt.txt'):
     try:
-        cleaned_prompt = prompt.strip()  # Entfernt führende und nachfolgende Leerzeichen
+        cleaned_prompt = prompt.strip()
         with open(file_path, 'a', encoding='utf-8') as file:
             file.write(cleaned_prompt + '\n')
         logging.info(f"Prompt in '{file_path}' gespeichert.")
     except Exception as e:
         logging.error(f"Fehler beim Schreiben in '{file_path}': {e}")
 
-# Funktion zur Validierung der Benutzereingabe für Begriffe
-def get_valid_user_input(prompt_message):
-    while True:
-        user_input = input(prompt_message).strip()
-        if user_input:
-            # Weitere Validierungen können hier hinzugefügt werden
-            if not user_input.isdigit():
-                return user_input
-            else:
-                logging.warning("Die Eingabe darf keine reinen Zahlen sein.")
-                print("Die Eingabe darf keine reinen Zahlen sein. Bitte versuche es erneut.")
-        else:
-            logging.warning("Leere Eingabe erkannt.")
-            print("Die Eingabe darf nicht leer sein. Bitte versuche es erneut.")
-
-# Funktion zur Bereinigung der CSV-Datei und Überschreiben der Originaldatei
 def clean_csv(file_path):
     try:
-        # Erstelle eine temporäre Datei
         with tempfile.NamedTemporaryFile(mode='w', delete=False, newline='', encoding='utf-8') as temp_file:
             temp_filename = temp_file.name
             with open(file_path, 'r', encoding='utf-8') as infile:
@@ -128,132 +98,118 @@ def clean_csv(file_path):
                     logging.error(f"Keine Feldnamen in der CSV-Datei '{file_path}' gefunden.")
                     return
                 writer = csv.DictWriter(temp_file, fieldnames=fieldnames)
-
-                # Schreibe die Kopfzeile
                 writer.writeheader()
                 logging.info(f"Spaltenüberschriften in temporärer Datei '{temp_filename}' hinzugefügt.")
-
                 for row in reader:
-                    # Überprüfen, ob 'Begriffe' keine unerwünschten Werte enthält
                     if row['Begriffe'].isdigit():
                         logging.warning(f"Überspringe Zeile mit ungültigen Begriffe: {row}")
-                        continue  # Diese Zeile überspringen
-
-                    # Bereinigen des 'Prompt'-Feldes
+                        continue
                     row['Prompt'] = row['Prompt'].strip().strip('"').rstrip(',')
-
                     writer.writerow(row)
                 logging.info(f"Bereinigte Daten wurden in temporärer Datei '{temp_filename}' gespeichert.")
-
-        # Ersetze die originale Datei durch die temporäre Datei
-        shutil.move(temp_filename, file_path)  # Verwendung von shutil.move für bessere Plattformunterstützung
+        shutil.move(temp_filename, file_path)
         logging.info(f"Die Datei '{file_path}' wurde erfolgreich aktualisiert.")
     except Exception as e:
         logging.error(f"Fehler bei der Bereinigung der CSV-Datei '{file_path}': {e}")
 
-# Hauptprogramm
-def main():
-    anweisungen_file = 'anweisungen.txt'
-    csv_file = 'prompts.csv'
+class App(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
 
-    # Backup der CSV-Datei erstellen (optional, aber empfohlen)
-    backup_file = 'prompts_backup.csv'
-    try:
-        if os.path.isfile(csv_file):
-            shutil.copy(csv_file, backup_file)
-            logging.info(f"Backup der CSV-Datei erstellt: '{backup_file}'")
-            print(f"Backup der CSV-Datei wurde erstellt: '{backup_file}'")
+    def initUI(self):
+        self.setWindowTitle('Text Generation with Ollama')
+        self.setGeometry(100, 100, 600, 400)
+
+        layout = QVBoxLayout()
+
+        self.anweisungen_label = QLabel('Anweisungen:')
+        layout.addWidget(self.anweisungen_label)
+
+        self.anweisungen_combo = QComboBox()
+        self.load_anweisungen()
+        layout.addWidget(self.anweisungen_combo)
+
+        self.model_label = QLabel('Modell:')
+        layout.addWidget(self.model_label)
+
+        self.model_combo = QComboBox()
+        self.load_models()
+        layout.addWidget(self.model_combo)
+
+        self.begriffe_label = QLabel('Begriffe/Wörter:')
+        layout.addWidget(self.begriffe_label)
+
+        self.begriffe_input = QLineEdit()
+        layout.addWidget(self.begriffe_input)
+
+        self.generate_button = QPushButton('Generieren')
+        self.generate_button.clicked.connect(self.generate_text)
+        layout.addWidget(self.generate_button)
+
+        self.generated_text_label = QLabel('Generierter Text:')
+        layout.addWidget(self.generated_text_label)
+
+        self.generated_text_edit = QTextEdit()
+        layout.addWidget(self.generated_text_edit)
+
+        self.copy_to_clipboard_button = QPushButton('In Zwischenablage kopieren')
+        self.copy_to_clipboard_button.clicked.connect(self.copy_to_clipboard)
+        layout.addWidget(self.copy_to_clipboard_button)
+
+        self.setLayout(layout)
+
+    def load_anweisungen(self):
+        anweisungen = read_anweisungen('anweisungen.txt')
+        if anweisungen:
+            self.anweisungen_combo.addItems(anweisungen)
         else:
-            logging.warning(f"Die Datei '{csv_file}' existiert nicht und kann nicht gesichert werden.")
-            print(f"Warnung: Die Datei '{csv_file}' existiert nicht und kann nicht gesichert werden.")
-    except Exception as e:
-        logging.error(f"Fehler beim Erstellen des Backups '{backup_file}': {e}")
-        print(f"Fehler beim Erstellen des Backups '{backup_file}': {e}")
+            QMessageBox.critical(self, 'Fehler', 'Keine Anweisungen gefunden. Bitte überprüfe die Datei anweisungen.txt.')
 
-    # Einlesen der Anweisungen
-    anweisungen = read_anweisungen(anweisungen_file)
-    if not anweisungen:
-        logging.error("Keine Anweisungen gefunden. Programm wird beendet.")
-        print("Keine Anweisungen gefunden. Bitte überprüfe die Datei anweisungen.txt.")
-        exit(1)
+    def load_models(self):
+        models = get_installed_models()
+        if models:
+            self.model_combo.addItems([f"Modell {k}: {v}" for k, v in models.items()])
+        else:
+            QMessageBox.critical(self, 'Fehler', 'Es sind keine Modelle installiert. Installiere bitte mindestens ein Modell.')
 
-    # Zufällige Auswahl einer Anweisung
-    selected_anweisung = random.choice(anweisungen)
-    print(f"\nAusgewählte Anweisung: {selected_anweisung}")
-    logging.info(f"Ausgewählte Anweisung: {selected_anweisung}")
+    def generate_text(self):
+        selected_anweisung = self.anweisungen_combo.currentText()
+        selected_model = self.model_combo.currentText().split(': ')[1]
+        user_input = self.begriffe_input.text().strip()
 
-    # Dynamisch installierte Modelle abrufen
-    modelle = get_installed_models()
+        if not user_input:
+            QMessageBox.warning(self, 'Fehler', 'Die Eingabe darf nicht leer sein.')
+            return
 
-    # Überprüfen, ob Modelle verfügbar sind
-    if not modelle:
-        logging.error("Es sind keine Modelle installiert. Programm wird beendet.")
-        print("Es sind keine Modelle installiert. Installiere bitte mindestens ein Modell.")
-        exit(1)
+        try:
+            client = ollama.Client()
+            prompt = f"{selected_anweisung.strip()}\n{user_input.strip()}"
+            response = client.generate(model=selected_model, prompt=prompt)
+            if 'response' in response:
+                generated_text = response['response'].strip()
+                self.generated_text_edit.setPlainText(generated_text)
 
-    # Dem Benutzer die Modelle zur Auswahl anbieten
-    print("\nVerfügbare Modelle:")
-    logging.info("Zeige verfügbare Modelle an.")
-    for key, model in modelle.items():
-        print(f"Modell {key}: {model}")
+                date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                save_to_csv('prompts.csv', date, user_input, selected_model, generated_text)
+                append_to_prompt_txt(generated_text)
+                clean_csv('prompts.csv')
+            else:
+                QMessageBox.critical(self, 'Fehler', 'Die Antwort enthält kein \'response\'-Feld.')
+        except Exception as e:
+            QMessageBox.critical(self, 'Fehler', f'Fehler bei der Generierung des Textes: {e}')
 
-    model_choice = input("\nDeine Wahl (Nummer): ").strip()
+    def copy_to_clipboard(self):
+        generated_text = self.generated_text_edit.toPlainText()
+        if generated_text:
+            clipboard = QApplication.clipboard()
+            clipboard.setText(generated_text)
+            QMessageBox.information(self, 'Erfolg', 'Generierter Text wurde in die Zwischenablage kopiert.')
+        else:
+            QMessageBox.warning(self, 'Fehler', 'Es gibt keinen generierten Text, der in die Zwischenablage kopiert werden kann.')
 
-    selected_model = modelle.get(model_choice)
-    if not selected_model:
-        logging.error(f"Ungültige Modellwahl: '{model_choice}'. Programm wird beendet.")
-        print("Ungültige Auswahl. Programm wird beendet.")
-        exit(1)
-
-    logging.info(f"Ausgewähltes Modell: {selected_model}")
-
-    # Eingabe der Begriffe/Wörter durch den Benutzer mit Validierung
-    user_input = get_valid_user_input("\nGib die Begriffe/Wörter ein: ")
-    logging.info(f"Benutzereingabe Begriffe: {user_input}")
-
-    # Initialisierung des Ollama-Clients
-    try:
-        client = ollama.Client()
-        logging.info("Ollama-Client erfolgreich initialisiert.")
-    except Exception as e:
-        logging.error(f"Fehler beim Initialisieren des Ollama-Clients: {e}")
-        print(f"Fehler beim Initialisieren des Ollama-Clients: {e}")
-        exit(1)
-
-    # Generierung des Textes mit dem ausgewählten Modell
-    prompt = f"{selected_anweisung.strip()}\n{user_input.strip()}"
-
-    logging.info(f"Generierter Prompt: {prompt}")
-
-    try:
-        response = client.generate(model=selected_model, prompt=prompt)
-        logging.info("Textgenerierung erfolgreich.")
-    except Exception as e:
-        logging.error(f"Fehler bei der Generierung des Textes: {e}")
-        print(f"Fehler bei der Generierung des Textes: {e}")
-        exit(1)
-
-    # Ausgabe und Verarbeitung der Antwort
-    date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    if 'response' in response:
-        generated_text = response['response'].strip()
-        print(f"\nGenerierte Antwort:\n{generated_text}")
-        logging.info("Generierte Antwort erfolgreich erhalten.")
-
-        # Speichern der Daten in die CSV-Datei
-        save_to_csv(csv_file, date, user_input, selected_model, generated_text)
-        logging.info("Daten wurden in die CSV-Datei gespeichert.")
-
-        # Speichern des generierten Prompts in prompt.txt
-        append_to_prompt_txt(generated_text)
-        logging.info("Generierter Prompt wurde in 'prompt.txt' gespeichert.")
-    else:
-        logging.error("Fehler: Die Antwort enthält kein 'response'-Feld.")
-        print("Fehler: Die Antwort enthält kein 'response'-Feld.")
-
-    # Bereinigen der CSV-Datei nach dem Schreiben
-    clean_csv(csv_file)
-
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = App()
+    ex.show()
+    sys.exit(app.exec())
