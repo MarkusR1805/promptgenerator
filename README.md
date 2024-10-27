@@ -38,6 +38,7 @@ pip install -r requirements.txt
 > If an installation does not work for whatever reason, but you have installed Python, you have the following option:
 > - start your terminal and type the following: cd
 > - install all the libraries listed below by hand
+> -- pip install anyio==4.6.2.post1
 
 These Python libraries should be installed!
 - anyio==4.6.2.post1
