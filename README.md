@@ -1,7 +1,13 @@
 <h1>Promptgenerator with Ollama</h1>
-Install Ollama
 
+Install Ollama
 <http://ollama.com>
+
+Install Git
+<https://git-scm.com/downloads>
+
+Install Python
+<https://www.python.org/downloads/>
 
 
 <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/c5769d49-f39a-4b84-9d27-b20ee9e625ba/original=true,quality=90/2024-10-26-163521.jpeg" alt="swirl, smoke, surreal, woman, portrait" title="Promptgenerator"/>
@@ -27,11 +33,11 @@ idna==3.10
 ollama==0.3.3
 sniffio==1.3.1
 
-<h1>The program is currently running in the terminal.<br>But it will soon have a GUI!</h1>
+<h2>The program is currently running in the terminal.<br>But it will soon have a GUI!</h2>
 
 <h2>Programm start</h2>
 
-```
+```sh
 python main.py
 ```
 
