@@ -34,7 +34,7 @@ pip install -r requirements.txt
 ```
 <h1>Troubleshooting</h1>
 If an installation does not work for whatever reason, but you have installed Python, you have the following option:
-1. start your terminal and type the following: **cd**
+1. start your terminal and type the following:**cd**
 2. install all the libraries listed below by hand
 
 These Python libraries should be installed!
