@@ -9,6 +9,10 @@ Install Git
 Install Python
 <https://www.python.org/downloads/>
 
+Clone Repository
+```sh
+git clone https://github.com/MarkusR1805/promptgenerator.git
+```
 
 <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/c5769d49-f39a-4b84-9d27-b20ee9e625ba/original=true,quality=90/2024-10-26-163521.jpeg" alt="swirl, smoke, surreal, woman, portrait" title="Promptgenerator"/>
 
@@ -24,8 +28,8 @@ cd promptgenerator
 pip install -r requirements.txt
 ```
 These Python libraries should be installed!
-anyio==4.6.2.post1
-certifi==2024.8.30
+- anyio==4.6.2.post1
+- certifi==2024.8.30
 h11==0.14.0
 httpcore==1.0.6
 httpx==0.27.2
