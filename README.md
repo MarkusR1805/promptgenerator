@@ -32,6 +32,11 @@ If the program does not start or an error message appears, be sure to execute th
 ```sh
 pip install -r requirements.txt
 ```
+<h1>Troubleshooting</h1>
+If an installation does not work for whatever reason, but you have installed Python, you have the following option:
+1. start your terminal and type the following: **cd**
+2. install all the libraries listed below by hand
+
 These Python libraries should be installed!
 - anyio==4.6.2.post1
 - certifi==2024.8.30
@@ -40,6 +45,10 @@ These Python libraries should be installed!
 - httpx==0.27.2
 - idna==3.10
 - ollama==0.3.3
+- sniffio==1.3.1
+- PyQt6==6.7.1
+- PyQt6-Qt6==6.7.3
+- PyQt6_sip==13.8.0
 - sniffio==1.3.1
 
 <h2>Programm start</h2>
