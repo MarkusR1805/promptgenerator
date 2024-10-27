@@ -32,10 +32,12 @@ If the program does not start or an error message appears, be sure to execute th
 ```sh
 pip install -r requirements.txt
 ```
-<h1>Troubleshooting</h1>
-If an installation does not work for whatever reason, but you have installed Python, you have the following option:
-1. start your terminal and type the following:**cd**
-2. install all the libraries listed below by hand
+
+> #### Troubleshooting
+
+> If an installation does not work for whatever reason, but you have installed Python, you have the following option:
+> - start your terminal and type the following: cd
+> - install all the libraries listed below by hand
 
 These Python libraries should be installed!
 - anyio==4.6.2.post1
