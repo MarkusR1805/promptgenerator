@@ -8,8 +8,8 @@ import re
 import tempfile
 import shutil
 import logging
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QTextEdit, QComboBox, QMessageBox, QDialog, QDialogButtonBox
-from PyQt6.QtGui import QClipboard
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QTextEdit, QComboBox, QMessageBox, QDialog, QDialogButtonBox, QMainWindow
+from PyQt6.QtGui import QClipboard, QScreen
 
 # Logging konfigurieren
 logging.basicConfig(
@@ -119,7 +119,9 @@ class PromptEditDialog(QDialog):
         self.prompt = prompt
         self.initUI()
 
+    # ANCHOR Bearbeiten Dialog
     def initUI(self):
+        self.setFixedSize(400,200)
         layout = QVBoxLayout()
         self.text_edit = QTextEdit()
         self.text_edit.setPlainText(self.prompt)
@@ -138,9 +140,10 @@ class App(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
-
+    
+    # ANCHOR Titel 
     def initUI(self):
-        self.setWindowTitle('Promptgenerator 2.2 / 2024 | by Der Zerfleischer')
+        self.setWindowTitle('2024 / Promptgenerator 2.2.1 | by Der Zerfleischer')
         self.setGeometry(100, 100, 600, 400)
 
         layout = QVBoxLayout()
@@ -171,8 +174,9 @@ class App(QWidget):
 
         self.generated_text_label = QLabel('Generierter Text:')
         layout.addWidget(self.generated_text_label)
-
+        # Anchor Textfeldgröße
         self.generated_text_edit = QTextEdit()
+        self.generated_text_edit.setMinimumSize(0,200)
         layout.addWidget(self.generated_text_edit)
 
         self.copy_to_clipboard_button = QPushButton('In Zwischenablage kopieren')
