@@ -10,18 +10,17 @@ import shutil
 import logging
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QTextEdit, QComboBox, QMessageBox, QDialog, QDialogButtonBox, QMainWindow
 from PyQt6.QtGui import QClipboard, QScreen
+import ollama
 
-# Logging konfigurieren
+
+# Logging konfigurieren Logfile kreieren
 logging.basicConfig(
     filename='script.log',
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-# Importieren der ollama-Bibliothek
-import ollama
-
-# Funktionen aus dem ursprünglichen Skript
+# Anweisungen.txt einlesen
 def read_anweisungen(file_path):
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
@@ -33,6 +32,7 @@ def read_anweisungen(file_path):
         logging.error(f"Die Datei '{file_path}' wurde nicht gefunden.")
         return []
 
+# CSV-Datei speichern und formattieren
 def save_to_csv(file_path, date, begriffe, model, prompt):
     file_exists = os.path.isfile(file_path)
     try:
@@ -54,6 +54,7 @@ def save_to_csv(file_path, date, begriffe, model, prompt):
     except Exception as e:
         logging.error(f"Fehler beim Schreiben in '{file_path}': {e}")
 
+# Ollama list ausführen
 def get_installed_models():
     try:
         result = subprocess.run(
@@ -78,6 +79,7 @@ def get_installed_models():
         logging.error(f"Unbekannter Fehler beim Abrufen der Modelle: {e}")
         return {}
 
+# prompt.txt speichern
 def append_to_prompt_txt(prompt, file_path='prompt.txt'):
     try:
         cleaned_prompt = prompt.strip()
@@ -87,6 +89,7 @@ def append_to_prompt_txt(prompt, file_path='prompt.txt'):
     except Exception as e:
         logging.error(f"Fehler beim Schreiben in '{file_path}': {e}")
 
+# CSV Prompts von " entfernen
 def clean_csv(file_path):
     try:
         with tempfile.NamedTemporaryFile(mode='w', delete=False, newline='', encoding='utf-8') as temp_file:
@@ -112,10 +115,11 @@ def clean_csv(file_path):
     except Exception as e:
         logging.error(f"Fehler bei der Bereinigung der CSV-Datei '{file_path}': {e}")
 
+# Dialogfenster nach dem generieren
 class PromptEditDialog(QDialog):
     def __init__(self, prompt):
         super().__init__()
-        self.setWindowTitle("Prompt bearbeiten")
+        self.setWindowTitle("Prompt bearbeiten / Edit promptly")
         self.prompt = prompt
         self.initUI()
 
@@ -141,9 +145,9 @@ class App(QWidget):
         super().__init__()
         self.initUI()
     
-    # ANCHOR Titel 
+    # ANCHOR Titel
     def initUI(self):
-        self.setWindowTitle('2024 / Promptgenerator 2.2.1 | by Der Zerfleischer')
+        self.setWindowTitle('2024 / Promptgenerator 2.2.2 | by Der Zerfleischer')
         self.setGeometry(100, 100, 600, 400)
 
         layout = QVBoxLayout()
@@ -162,24 +166,24 @@ class App(QWidget):
         self.load_models()
         layout.addWidget(self.model_combo)
 
-        self.begriffe_label = QLabel('Begriffe/Wörter:')
+        self.begriffe_label = QLabel('Begriffe / Keywords:')
         layout.addWidget(self.begriffe_label)
 
         self.begriffe_input = QLineEdit()
         layout.addWidget(self.begriffe_input)
 
-        self.generate_button = QPushButton('Generieren')
+        self.generate_button = QPushButton('Generieren / Generate')
         self.generate_button.clicked.connect(self.generate_text)
         layout.addWidget(self.generate_button)
 
-        self.generated_text_label = QLabel('Generierter Text:')
+        self.generated_text_label = QLabel('Generierter Prompt / Generate prompt:')
         layout.addWidget(self.generated_text_label)
         # Anchor Textfeldgröße
         self.generated_text_edit = QTextEdit()
         self.generated_text_edit.setMinimumSize(0,200)
         layout.addWidget(self.generated_text_edit)
 
-        self.copy_to_clipboard_button = QPushButton('In Zwischenablage kopieren')
+        self.copy_to_clipboard_button = QPushButton('In Zwischenablage kopieren / Copy to clipboard')
         self.copy_to_clipboard_button.clicked.connect(self.copy_to_clipboard)
         layout.addWidget(self.copy_to_clipboard_button)
 
@@ -190,14 +194,14 @@ class App(QWidget):
         if anweisungen:
             self.anweisungen_combo.addItems(anweisungen)
         else:
-            QMessageBox.critical(self, 'Fehler', 'Keine Anweisungen gefunden. Bitte überprüfe die Datei anweisungen.txt.')
+            QMessageBox.critical(self, 'Fehler', 'Keine Anweisungen gefunden. Bitte überprüfe die Datei anweisungen.txt.\nNo instructions found. Please check the file anweisungen.txt.')
 
     def load_models(self):
         models = get_installed_models()
         if models:
             self.model_combo.addItems([f"Modell {k}: {v}" for k, v in models.items()])
         else:
-            QMessageBox.critical(self, 'Fehler', 'Es sind keine Modelle installiert. Installiere bitte mindestens ein Modell.')
+            QMessageBox.critical(self, 'Fehler', 'Es sind keine Modelle installiert. Installiere bitte mindestens ein Modell.\nNo models are installed. Please install at least one model.')
 
     def generate_text(self):
         selected_anweisung = self.anweisungen_combo.currentText()
@@ -205,7 +209,7 @@ class App(QWidget):
         user_input = self.begriffe_input.text().strip()
 
         if not user_input:
-            QMessageBox.warning(self, 'Fehler', 'Die Eingabe darf nicht leer sein.')
+            QMessageBox.warning(self, 'Fehler', 'Die Eingabe darf nicht leer sein.\nThe input must not be empty')
             return
 
         try:
@@ -233,9 +237,9 @@ class App(QWidget):
         if generated_text:
             clipboard = QApplication.clipboard()
             clipboard.setText(generated_text)
-            QMessageBox.information(self, 'Erfolg', 'Generierter Text wurde in die Zwischenablage kopiert.')
+            QMessageBox.information(self, 'Erfolg', 'Generierter Text wurde in die Zwischenablage kopiert.\nGenerated text was copied to the clipboard.')
         else:
-            QMessageBox.warning(self, 'Fehler', 'Es gibt keinen generierten Text, der in die Zwischenablage kopiert werden kann.')
+            QMessageBox.warning(self, 'Fehler', 'Es gibt keinen generierten Text, der in die Zwischenablage kopiert werden kann.\nThere is no generated text that can be copied to the clipboard.')
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
