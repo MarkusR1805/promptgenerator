@@ -9,7 +9,7 @@ import tempfile
 import shutil
 import logging
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QTextEdit, QComboBox, QMessageBox, QDialog, QDialogButtonBox, QMainWindow
-from PyQt6.QtGui import QClipboard, QScreen
+from PyQt6.QtGui import QClipboard, QScreen, QIcon
 import ollama
 
 
@@ -125,7 +125,7 @@ class PromptEditDialog(QDialog):
 
     # ANCHOR Bearbeiten Dialog
     def initUI(self):
-        self.setFixedSize(400,200)
+        self.setFixedSize(500,300)
         layout = QVBoxLayout()
         self.text_edit = QTextEdit()
         self.text_edit.setPlainText(self.prompt)
@@ -144,7 +144,8 @@ class App(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
-    
+        self.setWindowIcon(QIcon('promptgenerator.icns'))
+
     # ANCHOR Titel
     def initUI(self):
         self.setWindowTitle('2024 / Promptgenerator 2.2.2 | by Der Zerfleischer')
@@ -221,12 +222,13 @@ class App(QWidget):
                 self.generated_text_edit.setPlainText(generated_text)
 
                 dlg = PromptEditDialog(generated_text)
-                if dlg.exec():
-                    edited_prompt = dlg.get_edited_prompt()
-                    date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    save_to_csv('prompts.csv', date, user_input, selected_model, edited_prompt)
-                    append_to_prompt_txt(edited_prompt)
-                    clean_csv('prompts.csv')
+            if dlg.exec():
+                edited_prompt = dlg.get_edited_prompt()
+                self.generated_text_edit.setPlainText(edited_prompt)  # Hier wird der bearbeitete Prompt im Hauptfenster aktualisiert
+                date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                save_to_csv('prompts.csv', date, user_input, selected_model, edited_prompt)
+                append_to_prompt_txt(edited_prompt)
+                clean_csv('prompts.csv')
             else:
                 QMessageBox.critical(self, 'Fehler', 'Die Antwort enthält kein \'response\'-Feld.')
         except Exception as e:
