@@ -230,7 +230,8 @@ class App(QWidget):
                 append_to_prompt_txt(edited_prompt)
                 clean_csv('prompts.csv')
             else:
-                QMessageBox.critical(self, 'Fehler', 'Die Antwort enthält kein \'response\'-Feld.')
+                #QMessageBox.critical(self, 'Fehler', 'Die Antwort enthält kein \'response\'-Feld.')
+                QMessageBox.critical(self, 'Fehler', 'Prompt wird nicht gespeichert!')
         except Exception as e:
             QMessageBox.critical(self, 'Fehler', f'Fehler bei der Generierung des Textes: {e}')
 
