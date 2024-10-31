@@ -9,7 +9,7 @@ import tempfile
 import shutil
 import logging
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QTextEdit, QComboBox, QMessageBox, QDialog, QDialogButtonBox, QMainWindow
-from PyQt6.QtGui import QClipboard, QScreen, QIcon
+from PyQt6.QtGui import QClipboard, QScreen
 import ollama
 
 
@@ -144,7 +144,6 @@ class App(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
-        self.setWindowIcon(QIcon('promptgenerator.icns'))
 
     # ANCHOR Titel
     def initUI(self):
