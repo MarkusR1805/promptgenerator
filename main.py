@@ -9,7 +9,7 @@ import tempfile
 import shutil
 import logging
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QTextEdit, QComboBox, QMessageBox, QDialog, QDialogButtonBox, QMainWindow
-from PyQt6.QtGui import QClipboard, QScreen
+from PyQt6.QtGui import QClipboard, QScreen, QFont
 import ollama
 
 
@@ -123,6 +123,11 @@ class PromptEditDialog(QDialog):
         self.prompt = prompt
         self.initUI()
 
+        # Schriftart und -größe festlegen
+        font = QFont()
+        font.setPointSize(16)
+        self.setFont(font)
+
     # ANCHOR Bearbeiten Dialog
     def initUI(self):
         self.setFixedSize(500,300)
@@ -144,6 +149,11 @@ class App(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
+    
+        # Schriftart und -größe festlegen
+        font = QFont()
+        font.setPointSize(16)
+        self.setFont(font)
 
     # ANCHOR Titel
     def initUI(self):
@@ -230,7 +240,7 @@ class App(QWidget):
                 clean_csv('prompts.csv')
             else:
                 #QMessageBox.critical(self, 'Fehler', 'Die Antwort enthält kein \'response\'-Feld.')
-                QMessageBox.critical(self, 'Fehler', 'Prompt wird nicht gespeichert!')
+                QMessageBox.critical(self, 'Fehler', 'Prompt wird nicht gespeichert!\nPrompt not saved!')
         except Exception as e:
             QMessageBox.critical(self, 'Fehler', f'Fehler bei der Generierung des Textes: {e}')
 
