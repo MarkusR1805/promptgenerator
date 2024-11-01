@@ -1,7 +1,5 @@
 Create only one prompt for text to image, without preface and comment or tips at the end, and without quotation marks, ending the prompt with a period!
 
-Create only one prompt with 30 words for text to image, without preface and comment or tips at the end, and without quotation marks, ending the prompt with a period!
-
-Create only one prompt with 50 words for text to image, without preface and comment or tips at the end, and without quotation marks, ending the prompt with a period!
+Create creativly only one prompt with 25 words for text to image, without preface and comment or tips at the end, and without quotation marks, ending the prompt with a period!
 
 Create very creativly only one prompt for text to image, without preface and comment or tips at the end, and without quotation marks, ending the prompt with a period!
