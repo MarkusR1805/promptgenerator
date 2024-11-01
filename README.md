@@ -2,7 +2,7 @@
 <p align="center">
   <img src="https://der-zerfleischer.de/images/github/pg1.jpeg" />
 </p>
-<h2>This program now has a GUI with a button for the clipboard.</h2>
+## This program now has a GUI with a button for the clipboard.
 
 Install Ollama
 <http://ollama.com>
@@ -13,6 +13,10 @@ llama3.2:3b
 ```sh
 ollama pull llama3.2:3b
 ```
+
+<p align="center">
+  <img src="https://der-zerfleischer.de/images/github/pg2.png" />
+</p>
 
 Install Git
 <https://git-scm.com/downloads>
