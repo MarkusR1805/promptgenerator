@@ -1,4 +1,7 @@
-<h1>Promptgenerator with Ollama</h1>
+<div align=center><h1>Promptgenerator 2.2 with Ollama</h1></div>
+<p align="center">
+  <img src="https://der-zerfleischer.de/images/github/pg1.png" />
+</p>
 <h2>This program now has a GUI with a button for the clipboard.</h2>
 
 Install Ollama
