@@ -157,7 +157,7 @@ class App(QWidget):
 
     # ANCHOR Titel
     def initUI(self):
-        self.setWindowTitle('2024 / Promptgenerator 2.2.3 | by Der Zerfleischer')
+        self.setWindowTitle('2024 / Promptgenerator 2.2.3 | by Der Zerfleischer on ')
         self.setGeometry(100, 100, 600, 400)
 
         layout = QVBoxLayout()
