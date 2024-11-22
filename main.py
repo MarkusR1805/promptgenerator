@@ -10,6 +10,7 @@ import shutil
 import logging
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QTextEdit, QComboBox, QMessageBox, QDialog, QDialogButtonBox, QMainWindow
 from PyQt6.QtGui import QClipboard, QScreen, QFont
+from PyQt6.QtCore import QTimer
 import ollama
 
 
@@ -149,7 +150,7 @@ class App(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
-    
+
         # Schriftart und -größe festlegen
         font = QFont()
         font.setPointSize(16)
@@ -249,9 +250,18 @@ class App(QWidget):
         if generated_text:
             clipboard = QApplication.clipboard()
             clipboard.setText(generated_text)
-            QMessageBox.information(self, 'Erfolg', 'Generierter Text wurde in die Zwischenablage kopiert.\nGenerated text was copied to the clipboard.')
+
+            # Ändere die Hintergrundfarbe des Buttons
+            self.copy_to_clipboard_button.setStyleSheet("background-color: green")
+
+            # Erstelle einen Timer, um die Farbe nach 500 ms zurückzusetzen
+            QTimer.singleShot(500, self.reset_button_color)
         else:
             QMessageBox.warning(self, 'Fehler', 'Es gibt keinen generierten Text, der in die Zwischenablage kopiert werden kann.\nThere is no generated text that can be copied to the clipboard.')
+
+    def reset_button_color(self):
+        # Setzt die Hintergrundfarbe des Buttons zurück
+        self.copy_to_clipboard_button.setStyleSheet("")
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
