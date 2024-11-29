@@ -200,7 +200,7 @@ class App(QWidget):
         layout.addWidget(self.generated_text_label)
         # Anchor Textfeldgröße
         self.generated_text_edit = QTextEdit()
-        self.generated_text_edit.setMinimumSize(0,200)
+        self.generated_text_edit.setMinimumSize(0,100)
         layout.addWidget(self.generated_text_edit)
 
         self.copy_to_clipboard_button = QPushButton('In Zwischenablage kopieren / Copy to clipboard')
