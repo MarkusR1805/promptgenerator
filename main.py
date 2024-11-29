@@ -9,10 +9,9 @@ import tempfile
 import shutil
 import logging
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QTextEdit, QComboBox, QMessageBox, QDialog, QDialogButtonBox, QMainWindow
-from PyQt6.QtGui import QClipboard, QScreen, QFont
-from PyQt6.QtCore import QTimer
+from PyQt6.QtGui import QClipboard, QScreen, QFont, QPixmap
+from PyQt6.QtCore import QTimer, Qt
 import ollama
-
 
 # Logging konfigurieren Logfile kreieren
 logging.basicConfig(
@@ -24,14 +23,18 @@ logging.basicConfig(
 # Anweisungen.txt einlesen
 def read_anweisungen(file_path):
     try:
+        logging.info(f"Versuche, Anweisungen aus '{file_path}' zu lesen.")
         with open(file_path, 'r', encoding='utf-8') as file:
             content = file.read()
-        anweisungen = [anweisung.strip() for anweisung in content.split('\n\n') if anweisung.strip()]
-        logging.info(f"Anweisungen aus '{file_path}' erfolgreich eingelesen.")
-        return anweisungen
+            anweisungen = [anweisung.strip() for anweisung in content.split('\n\n') if anweisung.strip()]
+            logging.info(f"Anweisungen erfolgreich aus '{file_path}' eingelesen: {anweisungen}")
+            return anweisungen
     except FileNotFoundError:
         logging.error(f"Die Datei '{file_path}' wurde nicht gefunden.")
         return []
+    except Exception as e:
+       logging.error(f"Ein Fehler trat beim Lesen der Datei auf: {e}")
+       return []
 
 # CSV-Datei speichern und formattieren
 def save_to_csv(file_path, date, begriffe, model, prompt):
@@ -158,8 +161,8 @@ class App(QWidget):
 
     # ANCHOR Titel
     def initUI(self):
-        self.setWindowTitle('2024 / Promptgenerator 2.2.4 | by Der Zerfleischer on ')
-        self.setGeometry(100, 100, 600, 400)
+        self.setWindowTitle('2024 / Promptgenerator 2.2.5 | by Der Zerfleischer on ')
+        self.setGeometry(100, 100, 500, 400)  # Angepasste Fensterbreite
 
         layout = QVBoxLayout()
 
@@ -167,8 +170,11 @@ class App(QWidget):
         layout.addWidget(self.anweisungen_label)
 
         self.anweisungen_combo = QComboBox()
+        self.anweisungen_combo.setMinimumHeight(50)  # Höhe für zweizeilige Anzeige
+        self.anweisungen_combo.setMaximumWidth(500) # Maximale Breite hinzugefügt
         self.load_anweisungen()
         layout.addWidget(self.anweisungen_combo)
+
 
         self.model_label = QLabel('Modell:')
         layout.addWidget(self.model_label)
@@ -180,12 +186,15 @@ class App(QWidget):
         self.begriffe_label = QLabel('Begriffe / Keywords:')
         layout.addWidget(self.begriffe_label)
 
-        self.begriffe_input = QLineEdit()
+        self.begriffe_input = QTextEdit()  # Mehrzeiliges Eingabefeld
+        self.begriffe_input.setMaximumHeight(100)  # Maximale Höhe, damit es nicht zu gross wird
         layout.addWidget(self.begriffe_input)
+
 
         self.generate_button = QPushButton('Generieren / Generate')
         self.generate_button.clicked.connect(self.generate_text)
         layout.addWidget(self.generate_button)
+
 
         self.generated_text_label = QLabel('Generierter Prompt / Generate prompt:')
         layout.addWidget(self.generated_text_label)
@@ -198,7 +207,28 @@ class App(QWidget):
         self.copy_to_clipboard_button.clicked.connect(self.copy_to_clipboard)
         layout.addWidget(self.copy_to_clipboard_button)
 
+
+        # Bild-Label erstellen und zentrieren
+        self.image_label = QLabel()
+        self.set_image("bild.jpeg") # hier kommt der Name des Bildes rein
+        self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.image_label)
+
         self.setLayout(layout)
+
+        # Erste Anweisung beim Start auswählen
+        if self.anweisungen_combo.count() > 0:
+            self.anweisungen_combo.setCurrentIndex(0)
+
+    def set_image(self, image_path):
+         try:
+            pixmap = QPixmap(image_path)
+            if pixmap.isNull():
+               logging.error(f"Fehler: Bild '{image_path}' konnte nicht geladen werden.")
+            else:
+               self.image_label.setPixmap(pixmap.scaled(300, 100, Qt.AspectRatioMode.KeepAspectRatio)) #Anpassung der Größe
+         except Exception as e:
+               logging.error(f"Fehler beim setzen des Bildes: {e}")
 
     def load_anweisungen(self):
         anweisungen = read_anweisungen('anweisungen.txt')
@@ -217,7 +247,7 @@ class App(QWidget):
     def generate_text(self):
         selected_anweisung = self.anweisungen_combo.currentText()
         selected_model = self.model_combo.currentText().split(': ')[1]
-        user_input = self.begriffe_input.text().strip()
+        user_input = self.begriffe_input.toPlainText().strip() # Änderung von text() zu toPlainText() für QTextEdit
 
         if not user_input:
             QMessageBox.warning(self, 'Fehler', 'Die Eingabe darf nicht leer sein.\nThe input must not be empty')
