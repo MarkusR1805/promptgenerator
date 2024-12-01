@@ -8,7 +8,7 @@ import re
 import tempfile
 import shutil
 import logging
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QTextEdit, QComboBox, QMessageBox, QDialog, QDialogButtonBox, QMainWindow
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QTextEdit, QComboBox, QMessageBox, QDialog, QDialogButtonBox, QMainWindow, QSizePolicy
 from PyQt6.QtGui import QClipboard, QScreen, QFont, QPixmap
 from PyQt6.QtCore import QTimer, Qt
 import ollama
@@ -161,8 +161,9 @@ class App(QWidget):
 
     # ANCHOR Titel
     def initUI(self):
-        self.setWindowTitle('2024 / Promptgenerator 2.2.5 | by Der Zerfleischer on ')
-        self.setGeometry(100, 100, 500, 400)  # Angepasste Fensterbreite
+        self.setWindowTitle('2024 / Promptgenerator 2.3.0| by Der Zerfleischer on ')
+        self.setGeometry(100, 100, 600, 600)  # Angepasste Fensterbreite
+        self.setFixedSize(self.size())
 
         layout = QVBoxLayout()
 
@@ -170,8 +171,9 @@ class App(QWidget):
         layout.addWidget(self.anweisungen_label)
 
         self.anweisungen_combo = QComboBox()
-        self.anweisungen_combo.setMinimumHeight(50)  # Höhe für zweizeilige Anzeige
-        self.anweisungen_combo.setMaximumWidth(500) # Maximale Breite hinzugefügt
+        self.anweisungen_combo.setMinimumHeight(25)  # Höhe für zweizeilige Anzeige
+        self.anweisungen_combo.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred))  # Korrektur hier
+        self.anweisungen_combo.setMaximumWidth(600) # Maximale Breite hinzugefügt
         self.load_anweisungen()
         layout.addWidget(self.anweisungen_combo)
 
@@ -208,11 +210,11 @@ class App(QWidget):
         layout.addWidget(self.copy_to_clipboard_button)
 
 
-        # Bild-Label erstellen und zentrieren
+        """ # ANCHOR Bild-Label erstellen und zentrieren
         self.image_label = QLabel()
-        self.set_image("bild.jpeg") # hier kommt der Name des Bildes rein
+        self.set_image("bild.png") # hier kommt der Name des Bildes rein
         self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.image_label)
+        layout.addWidget(self.image_label) """
 
         self.setLayout(layout)
 
@@ -220,7 +222,7 @@ class App(QWidget):
         if self.anweisungen_combo.count() > 0:
             self.anweisungen_combo.setCurrentIndex(0)
 
-    def set_image(self, image_path):
+    """ def set_image(self, image_path):
          try:
             pixmap = QPixmap(image_path)
             if pixmap.isNull():
@@ -228,12 +230,21 @@ class App(QWidget):
             else:
                self.image_label.setPixmap(pixmap.scaled(300, 100, Qt.AspectRatioMode.KeepAspectRatio)) #Anpassung der Größe
          except Exception as e:
-               logging.error(f"Fehler beim setzen des Bildes: {e}")
+               logging.error(f"Fehler beim setzen des Bildes: {e}") """
 
     def load_anweisungen(self):
         anweisungen = read_anweisungen('anweisungen.txt')
         if anweisungen:
             self.anweisungen_combo.addItems(anweisungen)
+            # ab hier teste ich etwas
+            font_metrics = self.anweisungen_combo.fontMetrics()
+            max_width = 0
+            for anweisung in anweisungen:
+                width = font_metrics.horizontalAdvance(anweisung)
+                max_width = max(max_width, width)
+            max_width = min(max_width + 20, 600) # 20px für Padding, maximal 500px
+            self.anweisungen_combo.setMaximumWidth(max_width)
+            # hier test ende
         else:
             QMessageBox.critical(self, 'Fehler', 'Keine Anweisungen gefunden. Bitte überprüfe die Datei anweisungen.txt.\nNo instructions found. Please check the file anweisungen.txt.')
 
