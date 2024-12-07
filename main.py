@@ -156,14 +156,15 @@ class App(QWidget):
 
         # Schriftart und -größe festlegen
         font = QFont()
-        font.setPointSize(16)
+        font.setPointSize(14)
         self.setFont(font)
 
     # ANCHOR Titel
     def initUI(self):
-        self.setWindowTitle('2024 / Promptgenerator 2.3 | by Der Zerfleischer on ')
-        self.setGeometry(100, 100, 600, 600)  # Angepasste Fensterbreite
-        self.setFixedSize(self.size())
+        self.setWindowTitle('2024 / Promptgenerator 2.3.1 | by Der Zerfleischer on ')
+        # self.setGeometry(100, 100, 600, 600)  # Angepasste Fensterbreite
+        # self.setFixedSize(self.size())
+        self.setFixedSize(600, 600)
 
         layout = QVBoxLayout()
 
