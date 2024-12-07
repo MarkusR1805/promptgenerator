@@ -211,11 +211,11 @@ class App(QWidget):
         layout.addWidget(self.copy_to_clipboard_button)
 
 
-        # ANCHOR Bild-Label erstellen und zentrieren
+        """ # ANCHOR Bild-Label erstellen und zentrieren
         self.image_label = QLabel()
         self.set_image("bild.png") # hier kommt der Name des Bildes rein
         self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.image_label)
+        layout.addWidget(self.image_label) """
 
         self.setLayout(layout)
 
@@ -223,7 +223,7 @@ class App(QWidget):
         if self.anweisungen_combo.count() > 0:
             self.anweisungen_combo.setCurrentIndex(0)
 
-    def set_image(self, image_path):
+    """ def set_image(self, image_path):
          try:
             pixmap = QPixmap(image_path)
             if pixmap.isNull():
@@ -231,7 +231,7 @@ class App(QWidget):
             else:
                self.image_label.setPixmap(pixmap.scaled(300, 100, Qt.AspectRatioMode.KeepAspectRatio)) #Anpassung der Größe
          except Exception as e:
-               logging.error(f"Fehler beim setzen des Bildes: {e}")
+               logging.error(f"Fehler beim setzen des Bildes: {e}") """
 
     def load_anweisungen(self):
         anweisungen = read_anweisungen('anweisungen.txt')
