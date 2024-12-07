@@ -1,4 +1,4 @@
-<div align=center><h1>Promptgenerator 2.2 with Ollama</h1></div>
+<div align=center><h1>Promptgenerator 2.3 with Ollama</h1></div>
 <p align="center">
   <img src="https://der-zerfleischer.de/images/github/pg1.jpeg" />
 </p>
