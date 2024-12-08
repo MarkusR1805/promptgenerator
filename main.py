@@ -156,7 +156,7 @@ class App(QWidget):
 
         # Schriftart und -größe festlegen
         font = QFont()
-        font.setPointSize(14)
+        font.setPointSize(16)
         self.setFont(font)
 
     # ANCHOR Titel
