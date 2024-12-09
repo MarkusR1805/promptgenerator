@@ -174,7 +174,7 @@ class App(QWidget):
         self.anweisungen_combo = QComboBox()
         self.anweisungen_combo.setMinimumHeight(25)  # Höhe für zweizeilige Anzeige
         self.anweisungen_combo.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred))  # Korrektur hier
-        self.anweisungen_combo.setMaximumWidth(700) # Maximale Breite hinzugefügt
+        self.anweisungen_combo.setMaximumWidth(800) # Maximale Breite hinzugefügt
         self.load_anweisungen()
         layout.addWidget(self.anweisungen_combo)
 
