@@ -172,7 +172,7 @@ class App(QWidget):
         layout.addWidget(self.anweisungen_label)
 
         self.anweisungen_combo = QComboBox()
-        self.anweisungen_combo.setMinimumHeight(30)  # Höhe für zweizeilige Anzeige
+        self.anweisungen_combo.setMinimumHeight(100)  # Höhe für zweizeilige Anzeige
         self.anweisungen_combo.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred))  # Korrektur hier
         self.anweisungen_combo.setMaximumWidth(700) # Maximale Breite hinzugefügt
         self.load_anweisungen()
@@ -183,7 +183,7 @@ class App(QWidget):
         layout.addWidget(self.model_label)
 
         self.model_combo = QComboBox()
-        self.model_combo.setMinimumHeight(30)  # Höhe für zweizeilige Anzeige
+        self.model_combo.setMinimumHeight(100)  # Höhe für zweizeilige Anzeige
         self.load_models()
         layout.addWidget(self.model_combo)
 
