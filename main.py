@@ -164,7 +164,7 @@ class App(QWidget):
         self.setWindowTitle('2024 / Promptgenerator 2.3.2 | by Der Zerfleischer on ')
         # self.setGeometry(100, 100, 600, 600)  # Angepasste Fensterbreite
         # self.setFixedSize(self.size())
-        self.setFixedSize(400, 600)
+        self.setFixedSize(700, 600)
 
         layout = QVBoxLayout()
 
@@ -174,7 +174,7 @@ class App(QWidget):
         self.anweisungen_combo = QComboBox()
         self.anweisungen_combo.setMinimumHeight(25)  # Höhe für zweizeilige Anzeige
         self.anweisungen_combo.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred))  # Korrektur hier
-        self.anweisungen_combo.setMaximumWidth(800) # Maximale Breite hinzugefügt
+        self.anweisungen_combo.setMaximumWidth(700) # Maximale Breite hinzugefügt
         self.load_anweisungen()
         layout.addWidget(self.anweisungen_combo)
 
@@ -243,7 +243,7 @@ class App(QWidget):
             for anweisung in anweisungen:
                 width = font_metrics.horizontalAdvance(anweisung)
                 max_width = max(max_width, width)
-            max_width = min(max_width + 20, 600) # 20px für Padding, maximal 500px
+            max_width = min(max_width + 20, 700) # 20px für Padding, maximal 500px
             self.anweisungen_combo.setMaximumWidth(max_width)
             # hier test ende
         else:
