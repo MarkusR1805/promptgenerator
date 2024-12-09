@@ -129,12 +129,12 @@ class PromptEditDialog(QDialog):
 
         # Schriftart und -größe festlegen
         font = QFont()
-        font.setPointSize(16)
+        font.setPointSize(18)
         self.setFont(font)
 
     # ANCHOR Bearbeiten Dialog
     def initUI(self):
-        self.setFixedSize(500,300)
+        self.setFixedSize(600,400)
         layout = QVBoxLayout()
         self.text_edit = QTextEdit()
         self.text_edit.setPlainText(self.prompt)
@@ -156,7 +156,7 @@ class App(QWidget):
 
         # Schriftart und -größe festlegen
         font = QFont()
-        font.setPointSize(16)
+        font.setPointSize(18)
         self.setFont(font)
 
     # ANCHOR Titel
@@ -164,7 +164,7 @@ class App(QWidget):
         self.setWindowTitle('2024 / Promptgenerator 2.3.2 | by Der Zerfleischer on ')
         # self.setGeometry(100, 100, 600, 600)  # Angepasste Fensterbreite
         # self.setFixedSize(self.size())
-        self.setFixedSize(600, 600)
+        self.setFixedSize(700, 600)
 
         layout = QVBoxLayout()
 
@@ -174,7 +174,7 @@ class App(QWidget):
         self.anweisungen_combo = QComboBox()
         self.anweisungen_combo.setMinimumHeight(25)  # Höhe für zweizeilige Anzeige
         self.anweisungen_combo.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred))  # Korrektur hier
-        self.anweisungen_combo.setMaximumWidth(600) # Maximale Breite hinzugefügt
+        self.anweisungen_combo.setMaximumWidth(800) # Maximale Breite hinzugefügt
         self.load_anweisungen()
         layout.addWidget(self.anweisungen_combo)
 
