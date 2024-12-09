@@ -183,6 +183,7 @@ class App(QWidget):
         layout.addWidget(self.model_label)
 
         self.model_combo = QComboBox()
+        self.model_combo.setMinimumHeight(25)  # Höhe für zweizeilige Anzeige
         self.load_models()
         layout.addWidget(self.model_combo)
 
