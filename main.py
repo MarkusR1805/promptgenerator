@@ -196,6 +196,12 @@ class App(QWidget):
 
         self.generate_button = QPushButton('Generieren / Generate')
         self.generate_button.clicked.connect(self.generate_text)
+
+        # Button Fontgröße
+        font = QFont()
+        font.setPointSize(18)
+        self.setFont(font)
+
         layout.addWidget(self.generate_button)
 
 
@@ -205,9 +211,6 @@ class App(QWidget):
         self.generated_text_edit = QTextEdit()
         self.generated_text_edit.setMinimumSize(0,100)
         layout.addWidget(self.generated_text_edit)
-        font = QFont()
-        font.setPointSize(18)
-        self.setFont(font)
 
         self.copy_to_clipboard_button = QPushButton('In Zwischenablage kopieren / Copy to clipboard')
         self.copy_to_clipboard_button.clicked.connect(self.copy_to_clipboard)
