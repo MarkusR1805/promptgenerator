@@ -161,7 +161,7 @@ class App(QWidget):
 
     # ANCHOR Titel
     def initUI(self):
-        self.setWindowTitle('2024 / Promptgenerator 2.3.1 | by Der Zerfleischer on ')
+        self.setWindowTitle('2024 / Promptgenerator 2.3.2 | by Der Zerfleischer on ')
         # self.setGeometry(100, 100, 600, 600)  # Angepasste Fensterbreite
         # self.setFixedSize(self.size())
         self.setFixedSize(600, 600)
