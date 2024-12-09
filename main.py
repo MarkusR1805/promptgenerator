@@ -164,7 +164,7 @@ class App(QWidget):
         self.setWindowTitle('2024 / Promptgenerator 2.3.2 | by Der Zerfleischer on ')
         # self.setGeometry(100, 100, 600, 600)  # Angepasste Fensterbreite
         # self.setFixedSize(self.size())
-        self.setFixedSize(700, 600)
+        self.setFixedSize(400, 600)
 
         layout = QVBoxLayout()
 
