@@ -196,12 +196,6 @@ class App(QWidget):
 
         self.generate_button = QPushButton('Generieren / Generate')
         self.generate_button.clicked.connect(self.generate_text)
-
-        # Button Fontgröße
-        font = QFont()
-        font.setPointSize(18)
-        self.setFont(font)
-
         layout.addWidget(self.generate_button)
 
 
