@@ -205,6 +205,9 @@ class App(QWidget):
         self.generated_text_edit = QTextEdit()
         self.generated_text_edit.setMinimumSize(0,100)
         layout.addWidget(self.generated_text_edit)
+        font = QFont()
+        font.setPointSize(18)
+        self.setFont(font)
 
         self.copy_to_clipboard_button = QPushButton('In Zwischenablage kopieren / Copy to clipboard')
         self.copy_to_clipboard_button.clicked.connect(self.copy_to_clipboard)
@@ -243,7 +246,7 @@ class App(QWidget):
             for anweisung in anweisungen:
                 width = font_metrics.horizontalAdvance(anweisung)
                 max_width = max(max_width, width)
-            max_width = min(max_width + 20, 700) # 20px für Padding, maximal 500px
+            max_width = min(max_width + 20, 700) # 20px für Padding, maximal 700px
             self.anweisungen_combo.setMaximumWidth(max_width)
             # hier test ende
         else:
