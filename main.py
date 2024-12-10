@@ -161,7 +161,7 @@ class App(QWidget):
 
     # ANCHOR Titel
     def initUI(self):
-        self.setWindowTitle('2024 / Promptgenerator 2.3.2 | by Der Zerfleischer on ')
+        self.setWindowTitle('2024 / Promptgenerator 2.3.3 | by Der Zerfleischer on ')
         # self.setGeometry(100, 100, 600, 600)  # Angepasste Fensterbreite
         # self.setFixedSize(self.size())
         self.setFixedSize(700, 600)
@@ -209,6 +209,7 @@ class App(QWidget):
 
         self.copy_to_clipboard_button = QPushButton('In Zwischenablage kopieren / Copy to clipboard')
         self.copy_to_clipboard_button.clicked.connect(self.copy_to_clipboard)
+        self.copy_to_clipboard_button.setFont(QFont('', 18))
         layout.addWidget(self.copy_to_clipboard_button)
 
 
