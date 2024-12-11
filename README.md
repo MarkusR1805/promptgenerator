@@ -63,7 +63,7 @@ These Python libraries should be installed!
 - httpcore==1.0.6
 - httpx==0.27.2
 - idna==3.10
-- ollama==0.3.3
+- ollama==0.4.3
 - sniffio==1.3.1
 - PyQt6==6.7.1
 - PyQt6-Qt6==6.7.3
