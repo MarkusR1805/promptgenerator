@@ -46,8 +46,13 @@ def save_to_csv(file_path, date, begriffe, model, prompt):
             if not file_exists:
                 writer.writeheader()
                 logging.info(f"Spaltenüberschriften in '{file_path}' hinzugefügt.")
-            prompt = re.sub(r'[^\x00-\x7F]+||:', '', prompt)
-            prompt = prompt.replace('\n', ' ').strip()
+            # prompt = re.sub(r'[^\x00-\x7F]+||:', '', prompt) # Alte Zeile raus, weil nicht mehr benötigt
+            prompt = prompt.strip()  # Entfernt führende und nachfolgende Leerzeichen
+            if prompt.endswith('\n.'):
+                prompt = prompt.replace('\n.', '').strip()
+            prompt = prompt.replace('\n', ' ') # Zeilenumbrüche zu Leerzeichen
+            prompt = re.sub(r'^\"', '', prompt) # Doppelte Anführungszeichen am Anfang entfernen
+            prompt = re.sub(r'\"$', '', prompt) # Doppelte Anführungszeichen am Ende entfernen
             writer.writerow({
                 "Datum": date,
                 "Begriffe": begriffe,
@@ -112,6 +117,7 @@ def clean_csv(file_path):
                         logging.warning(f"Überspringe Zeile mit ungültigen Begriffe: {row}")
                         continue
                     row['Prompt'] = row['Prompt'].strip().strip('"').rstrip(',')
+                    row['Prompt'] = row['Prompt'].lstrip('"').rstrip('"') # Diese Zeile ergänzt
                     writer.writerow(row)
                 logging.info(f"Bereinigte Daten wurden in temporärer Datei '{temp_filename}' gespeichert.")
         shutil.move(temp_filename, file_path)
@@ -129,7 +135,7 @@ class PromptEditDialog(QDialog):
 
         # Schriftart und -größe festlegen
         font = QFont()
-        font.setPointSize(18)
+        font.setPointSize(16)
         self.setFont(font)
 
     # ANCHOR Bearbeiten Dialog
@@ -156,19 +162,19 @@ class App(QWidget):
 
         # Schriftart und -größe festlegen
         font = QFont()
-        font.setPointSize(18)
+        font.setPointSize(16)
         self.setFont(font)
 
     # ANCHOR Titel
     def initUI(self):
-        self.setWindowTitle('2024 / Promptgenerator 2.3.3 | by Der Zerfleischer on ')
+        self.setWindowTitle('2024 / Promptgenerator 2.3.5 | by Der Zerfleischer on ')
         # self.setGeometry(100, 100, 600, 600)  # Angepasste Fensterbreite
         # self.setFixedSize(self.size())
         self.setFixedSize(700, 600)
 
         layout = QVBoxLayout()
 
-        self.anweisungen_label = QLabel('Anweisungen:')
+        self.anweisungen_label = QLabel('Anweisungen / Instruction:')
         layout.addWidget(self.anweisungen_label)
 
         self.anweisungen_combo = QComboBox()
@@ -179,7 +185,7 @@ class App(QWidget):
         layout.addWidget(self.anweisungen_combo)
 
 
-        self.model_label = QLabel('Modell:')
+        self.model_label = QLabel('Ollama Modelle / Ollama models:')
         layout.addWidget(self.model_label)
 
         self.model_combo = QComboBox()
@@ -209,31 +215,14 @@ class App(QWidget):
 
         self.copy_to_clipboard_button = QPushButton('In Zwischenablage kopieren / Copy to clipboard')
         self.copy_to_clipboard_button.clicked.connect(self.copy_to_clipboard)
-        self.copy_to_clipboard_button.setFont(QFont('', 18))
+        self.copy_to_clipboard_button.setFont(QFont('', 16))
         layout.addWidget(self.copy_to_clipboard_button)
-
-
-        """ # ANCHOR Bild-Label erstellen und zentrieren
-        self.image_label = QLabel()
-        self.set_image("bild.png") # hier kommt der Name des Bildes rein
-        self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.image_label) """
 
         self.setLayout(layout)
 
         # Erste Anweisung beim Start auswählen
         if self.anweisungen_combo.count() > 0:
             self.anweisungen_combo.setCurrentIndex(0)
-
-    """ def set_image(self, image_path):
-         try:
-            pixmap = QPixmap(image_path)
-            if pixmap.isNull():
-               logging.error(f"Fehler: Bild '{image_path}' konnte nicht geladen werden.")
-            else:
-               self.image_label.setPixmap(pixmap.scaled(300, 100, Qt.AspectRatioMode.KeepAspectRatio)) #Anpassung der Größe
-         except Exception as e:
-               logging.error(f"Fehler beim setzen des Bildes: {e}") """
 
     def load_anweisungen(self):
         anweisungen = read_anweisungen('anweisungen.txt')
@@ -273,6 +262,14 @@ class App(QWidget):
             response = client.generate(model=selected_model, prompt=prompt)
             if 'response' in response:
                 generated_text = response['response'].strip()
+
+                # Hier filterst du den generierten Text
+                generated_text = generated_text.strip()  # Entfernt führende und nachfolgende Leerzeichen
+                if generated_text.endswith('\n.'):
+                   generated_text = generated_text.replace('\n.', '').strip()  # Entfernt die Zeile mit dem Punkt am Ende (bei manchen LLM's ein häufiges Vorkommen)
+                generated_text = re.sub(r'^\"', '', generated_text) # Doppelte Anführungszeichen am Anfang entfernen
+                generated_text = re.sub(r'\"$', '', generated_text) # Doppelte Anführungszeichen am Ende entfernen
+
                 self.generated_text_edit.setPlainText(generated_text)
 
                 dlg = PromptEditDialog(generated_text)
@@ -284,7 +281,6 @@ class App(QWidget):
                 append_to_prompt_txt(edited_prompt)
                 clean_csv('prompts.csv')
             else:
-                #QMessageBox.critical(self, 'Fehler', 'Die Antwort enthält kein \'response\'-Feld.')
                 QMessageBox.critical(self, 'Fehler', 'Prompt wird nicht gespeichert!\nPrompt not saved!')
         except Exception as e:
             QMessageBox.critical(self, 'Fehler', f'Fehler bei der Generierung des Textes: {e}')
@@ -298,8 +294,8 @@ class App(QWidget):
             # Ändere die Hintergrundfarbe des Buttons
             self.copy_to_clipboard_button.setStyleSheet("background-color: green")
 
-            # Erstelle einen Timer, um die Farbe nach 500 ms zurückzusetzen
-            QTimer.singleShot(500, self.reset_button_color)
+            # Erstelle einen Timer, um die Farbe nach 100 ms zurückzusetzen
+            QTimer.singleShot(100, self.reset_button_color)
         else:
             QMessageBox.warning(self, 'Fehler', 'Es gibt keinen generierten Text, der in die Zwischenablage kopiert werden kann.\nThere is no generated text that can be copied to the clipboard.')
 
