@@ -1,129 +1,9 @@
 import sys
-import random
-import subprocess
-import os
-import csv
 from datetime import datetime
-import re
-import tempfile
-import shutil
-import logging
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QTextEdit, QComboBox, QMessageBox, QDialog, QDialogButtonBox, QMainWindow, QSizePolicy
-from PyQt6.QtGui import QClipboard, QScreen, QFont, QPixmap
-from PyQt6.QtCore import QTimer, Qt
-import ollama
-
-# Logging konfigurieren Logfile kreieren
-logging.basicConfig(
-    filename='script.log',
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-
-# Anweisungen.txt einlesen
-def read_anweisungen(file_path):
-    try:
-        logging.info(f"Versuche, Anweisungen aus '{file_path}' zu lesen.")
-        with open(file_path, 'r', encoding='utf-8') as file:
-            content = file.read()
-            anweisungen = [anweisung.strip() for anweisung in content.split('\n\n') if anweisung.strip()]
-            logging.info(f"Anweisungen erfolgreich aus '{file_path}' eingelesen: {anweisungen}")
-            return anweisungen
-    except FileNotFoundError:
-        logging.error(f"Die Datei '{file_path}' wurde nicht gefunden.")
-        return []
-    except Exception as e:
-       logging.error(f"Ein Fehler trat beim Lesen der Datei auf: {e}")
-       return []
-
-# CSV-Datei speichern und formattieren
-def save_to_csv(file_path, date, begriffe, model, prompt):
-    file_exists = os.path.isfile(file_path)
-    try:
-        with open(file_path, 'a', newline='', encoding='utf-8') as csvfile:
-            fieldnames = ["Datum", "Begriffe", "Modell", "Prompt"]
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            if not file_exists:
-                writer.writeheader()
-                logging.info(f"Spaltenüberschriften in '{file_path}' hinzugefügt.")
-            # prompt = re.sub(r'[^\x00-\x7F]+||:', '', prompt) # Alte Zeile raus, weil nicht mehr benötigt
-            prompt = prompt.strip()  # Entfernt führende und nachfolgende Leerzeichen
-            if prompt.endswith('\n.'):
-                prompt = prompt.replace('\n.', '').strip()
-            prompt = prompt.replace('\n', ' ') # Zeilenumbrüche zu Leerzeichen
-            prompt = re.sub(r'^\"', '', prompt) # Doppelte Anführungszeichen am Anfang entfernen
-            prompt = re.sub(r'\"$', '', prompt) # Doppelte Anführungszeichen am Ende entfernen
-            writer.writerow({
-                "Datum": date,
-                "Begriffe": begriffe,
-                "Modell": model,
-                "Prompt": prompt
-            })
-            logging.info(f"Neue Zeile in '{file_path}' hinzugefügt.")
-    except Exception as e:
-        logging.error(f"Fehler beim Schreiben in '{file_path}': {e}")
-
-# Ollama list ausführen
-def get_installed_models():
-    try:
-        result = subprocess.run(
-            ['ollama', 'list'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            check=True
-        )
-        lines = result.stdout.strip().split('\n')
-        if len(lines) <= 1:
-            logging.warning("Keine Modelle gefunden.")
-            return {}
-        models = lines[1:]
-        model_dict = {str(i + 1): model_line.split()[0] for i, model_line in enumerate(models)}
-        logging.info(f"{len(model_dict)} Modelle gefunden.")
-        return model_dict
-    except subprocess.CalledProcessError as e:
-        logging.error(f"Fehler beim Abrufen der Modelle: {e.stderr}")
-        return {}
-    except Exception as e:
-        logging.error(f"Unbekannter Fehler beim Abrufen der Modelle: {e}")
-        return {}
-
-# prompt.txt speichern
-def append_to_prompt_txt(prompt, file_path='prompt.txt'):
-    try:
-        cleaned_prompt = prompt.strip()
-        with open(file_path, 'a', encoding='utf-8') as file:
-            file.write(cleaned_prompt + '\n')
-        logging.info(f"Prompt in '{file_path}' gespeichert.")
-    except Exception as e:
-        logging.error(f"Fehler beim Schreiben in '{file_path}': {e}")
-
-# CSV Prompts von " entfernen
-def clean_csv(file_path):
-    try:
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, newline='', encoding='utf-8') as temp_file:
-            temp_filename = temp_file.name
-            with open(file_path, 'r', encoding='utf-8') as infile:
-                reader = csv.DictReader(infile)
-                fieldnames = reader.fieldnames
-                if not fieldnames:
-                    logging.error(f"Keine Feldnamen in der CSV-Datei '{file_path}' gefunden.")
-                    return
-                writer = csv.DictWriter(temp_file, fieldnames=fieldnames)
-                writer.writeheader()
-                logging.info(f"Spaltenüberschriften in temporärer Datei '{temp_filename}' hinzugefügt.")
-                for row in reader:
-                    if row['Begriffe'].isdigit():
-                        logging.warning(f"Überspringe Zeile mit ungültigen Begriffe: {row}")
-                        continue
-                    row['Prompt'] = row['Prompt'].strip().strip('"').rstrip(',')
-                    row['Prompt'] = row['Prompt'].lstrip('"').rstrip('"') # Diese Zeile ergänzt
-                    writer.writerow(row)
-                logging.info(f"Bereinigte Daten wurden in temporärer Datei '{temp_filename}' gespeichert.")
-        shutil.move(temp_filename, file_path)
-        logging.info(f"Die Datei '{file_path}' wurde erfolgreich aktualisiert.")
-    except Exception as e:
-        logging.error(f"Fehler bei der Bereinigung der CSV-Datei '{file_path}': {e}")
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QTextEdit, QComboBox, QMessageBox, QDialog, QDialogButtonBox, QSizePolicy
+from PyQt6.QtGui import QClipboard, QFont
+from PyQt6.QtCore import QTimer
+from utils import read_anweisungen, get_installed_models, save_to_csv, append_to_prompt_txt, clean_csv, generate_ollama_prompt
 
 # Dialogfenster nach dem generieren
 class PromptEditDialog(QDialog):
@@ -167,10 +47,8 @@ class App(QWidget):
 
     # ANCHOR Titel
     def initUI(self):
-        self.setWindowTitle('2024 / Promptgenerator 2.3.5 | by Der Zerfleischer on ')
-        # self.setGeometry(100, 100, 600, 600)  # Angepasste Fensterbreite
-        # self.setFixedSize(self.size())
-        self.setFixedSize(700, 600)
+        self.setWindowTitle('2024 / Promptgenerator 2.3.6 | by Der Zerfleischer on ')
+        self.setFixedSize(800, 600)
 
         layout = QVBoxLayout()
 
@@ -178,18 +56,17 @@ class App(QWidget):
         layout.addWidget(self.anweisungen_label)
 
         self.anweisungen_combo = QComboBox()
-        self.anweisungen_combo.setMinimumHeight(25)  # Höhe für zweizeilige Anzeige
-        self.anweisungen_combo.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred))  # Korrektur hier
-        self.anweisungen_combo.setMaximumWidth(700) # Maximale Breite hinzugefügt
+        self.anweisungen_combo.setMinimumHeight(25)
+        self.anweisungen_combo.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred))
         self.load_anweisungen()
         layout.addWidget(self.anweisungen_combo)
-
 
         self.model_label = QLabel('Ollama Modelle / Ollama models:')
         layout.addWidget(self.model_label)
 
         self.model_combo = QComboBox()
-        self.model_combo.setMinimumHeight(25)  # Höhe für zweizeilige Anzeige
+        self.model_combo.setMinimumHeight(25)
+        self.model_combo.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred))
         self.load_models()
         layout.addWidget(self.model_combo)
 
@@ -197,20 +74,18 @@ class App(QWidget):
         layout.addWidget(self.begriffe_label)
 
         self.begriffe_input = QTextEdit()  # Mehrzeiliges Eingabefeld
-        self.begriffe_input.setMaximumHeight(100)  # Maximale Höhe, damit es nicht zu gross wird
+        self.begriffe_input.setMaximumHeight(70)  # Maximale Höhe, damit es nicht zu gross wird
         layout.addWidget(self.begriffe_input)
-
 
         self.generate_button = QPushButton('Generieren / Generate')
         self.generate_button.clicked.connect(self.generate_text)
         layout.addWidget(self.generate_button)
 
-
         self.generated_text_label = QLabel('Generierter Prompt / Generate prompt:')
         layout.addWidget(self.generated_text_label)
-        # Anchor Textfeldgröße
+        # ANCHOR Textfeldgröße
         self.generated_text_edit = QTextEdit()
-        self.generated_text_edit.setMinimumSize(0,100)
+        self.generated_text_edit.setMinimumSize(0,70)
         layout.addWidget(self.generated_text_edit)
 
         self.copy_to_clipboard_button = QPushButton('In Zwischenablage kopieren / Copy to clipboard')
@@ -228,15 +103,6 @@ class App(QWidget):
         anweisungen = read_anweisungen('anweisungen.txt')
         if anweisungen:
             self.anweisungen_combo.addItems(anweisungen)
-            # ab hier teste ich etwas
-            font_metrics = self.anweisungen_combo.fontMetrics()
-            max_width = 0
-            for anweisung in anweisungen:
-                width = font_metrics.horizontalAdvance(anweisung)
-                max_width = max(max_width, width)
-            max_width = min(max_width + 20, 700) # 20px für Padding, maximal 700px
-            self.anweisungen_combo.setMaximumWidth(max_width)
-            # hier test ende
         else:
             QMessageBox.critical(self, 'Fehler', 'Keine Anweisungen gefunden. Bitte überprüfe die Datei anweisungen.txt.\nNo instructions found. Please check the file anweisungen.txt.')
 
@@ -250,40 +116,30 @@ class App(QWidget):
     def generate_text(self):
         selected_anweisung = self.anweisungen_combo.currentText()
         selected_model = self.model_combo.currentText().split(': ')[1]
-        user_input = self.begriffe_input.toPlainText().strip() # Änderung von text() zu toPlainText() für QTextEdit
+        user_input = self.begriffe_input.toPlainText().strip()
 
         if not user_input:
             QMessageBox.warning(self, 'Fehler', 'Die Eingabe darf nicht leer sein.\nThe input must not be empty')
             return
 
-        try:
-            client = ollama.Client()
-            prompt = f"{selected_anweisung.strip()}\n{user_input.strip()}"
-            response = client.generate(model=selected_model, prompt=prompt)
-            if 'response' in response:
-                generated_text = response['response'].strip()
+        generated_text = generate_ollama_prompt(selected_anweisung, user_input, selected_model)
 
-                # Hier filterst du den generierten Text
-                generated_text = generated_text.strip()  # Entfernt führende und nachfolgende Leerzeichen
-                if generated_text.endswith('\n.'):
-                   generated_text = generated_text.replace('\n.', '').strip()  # Entfernt die Zeile mit dem Punkt am Ende (bei manchen LLM's ein häufiges Vorkommen)
-                generated_text = re.sub(r'^\"', '', generated_text) # Doppelte Anführungszeichen am Anfang entfernen
-                generated_text = re.sub(r'\"$', '', generated_text) # Doppelte Anführungszeichen am Ende entfernen
+        if generated_text:
+            self.generated_text_edit.setPlainText(generated_text)
 
-                self.generated_text_edit.setPlainText(generated_text)
-
-                dlg = PromptEditDialog(generated_text)
+            dlg = PromptEditDialog(generated_text)
             if dlg.exec():
                 edited_prompt = dlg.get_edited_prompt()
-                self.generated_text_edit.setPlainText(edited_prompt)  # Hier wird der bearbeitete Prompt im Hauptfenster aktualisiert
+                self.generated_text_edit.setPlainText(edited_prompt)
                 date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 save_to_csv('prompts.csv', date, user_input, selected_model, edited_prompt)
                 append_to_prompt_txt(edited_prompt)
                 clean_csv('prompts.csv')
             else:
                 QMessageBox.critical(self, 'Fehler', 'Prompt wird nicht gespeichert!\nPrompt not saved!')
-        except Exception as e:
-            QMessageBox.critical(self, 'Fehler', f'Fehler bei der Generierung des Textes: {e}')
+        else:
+           QMessageBox.critical(self, 'Fehler', 'Fehler bei der Generierung des Textes!')
+
 
     def copy_to_clipboard(self):
         generated_text = self.generated_text_edit.toPlainText()
