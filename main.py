@@ -5,7 +5,7 @@ from PyQt6.QtGui import QClipboard, QFont
 from PyQt6.QtCore import QTimer
 from utils import read_anweisungen, get_installed_models, save_to_csv, append_to_prompt_txt, clean_csv, generate_ollama_prompt
 
-# Dialogfenster nach dem generieren
+# ANCHOR Dialogfenster nach dem generieren
 class PromptEditDialog(QDialog):
     def __init__(self, prompt):
         super().__init__()
