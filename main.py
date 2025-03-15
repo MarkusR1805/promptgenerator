@@ -1,11 +1,11 @@
 import sys
 from datetime import datetime
-from PyQt6.QtWidgets import (
+from PySide6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QTextEdit, QComboBox,
     QMessageBox, QDialog, QDialogButtonBox, QSizePolicy
 )
-from PyQt6.QtGui import QClipboard, QFont
-from PyQt6.QtCore import QTimer
+from PySide6.QtGui import QClipboard, QFont
+from PySide6.QtCore import QTimer
 from utils import read_anweisungen, get_installed_models, save_to_csv, append_to_prompt_txt, clean_csv, generate_ollama_prompt
 
 # Konstanten für Dateinamen und Schriftgrößen
