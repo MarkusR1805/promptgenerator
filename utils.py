@@ -7,13 +7,24 @@ import tempfile
 import shutil
 import logging
 from datetime import datetime
-import ollama
 
-# Logging wird erst später initialisiert → keine Konfiguration hier!
+def find_ollama_binary():
+    """Findet den ollama-Befehl – auch ohne PATH."""
+    candidates = [
+        "/usr/local/bin/ollama",
+        "/opt/homebrew/bin/ollama",
+        os.path.expanduser("~/.ollama/bin/ollama")
+    ]
+    for path in candidates:
+        if os.path.isfile(path):
+            return path
+    import shutil
+    return shutil.which("ollama")
+
+# Logging
 _logger_configured = False
 
 def setup_logging(log_file_path):
-    """Initialisiert das Logging mit einem benutzerspezifischen Pfad."""
     global _logger_configured
     if not _logger_configured:
         logging.basicConfig(
@@ -23,7 +34,6 @@ def setup_logging(log_file_path):
             force=True
         )
         _logger_configured = True
-
 
 def read_anweisungen(file_path):
     try:
@@ -39,7 +49,6 @@ def read_anweisungen(file_path):
     except Exception as e:
         logging.error(f"Ein Fehler trat beim Lesen der Datei auf: {e}")
         return []
-
 
 def save_to_csv(file_path, date, begriffe, model, prompt):
     file_exists = os.path.isfile(file_path)
@@ -66,15 +75,20 @@ def save_to_csv(file_path, date, begriffe, model, prompt):
     except Exception as e:
         logging.error(f"Fehler beim Schreiben in '{file_path}': {e}")
 
-
 def get_installed_models():
+    ollama_cmd = find_ollama_binary()
+    if not ollama_cmd:
+        logging.error("Ollama-CLI nicht gefunden.")
+        return {}
+
     try:
         result = subprocess.run(
-            ['ollama', 'list'],
+            [ollama_cmd, 'list'],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            check=True
+            check=True,
+            timeout=30
         )
         lines = result.stdout.strip().split('\n')
         if len(lines) <= 1:
@@ -84,6 +98,9 @@ def get_installed_models():
         model_dict = {str(i + 1): model_line.split()[0] for i, model_line in enumerate(models)}
         logging.info(f"{len(model_dict)} Modelle gefunden.")
         return model_dict
+    except subprocess.TimeoutExpired:
+        logging.error("Timeout beim Abrufen der Modelle.")
+        return {}
     except subprocess.CalledProcessError as e:
         logging.error(f"Fehler beim Abrufen der Modelle: {e.stderr}")
         return {}
@@ -91,9 +108,7 @@ def get_installed_models():
         logging.error(f"Unbekannter Fehler beim Abrufen der Modelle: {e}")
         return {}
 
-
 def append_to_prompt_txt(prompt, file_path):
-    """Speichert den Prompt in eine benutzerspezifische Datei (nicht mehr mit Default-Wert!)."""
     try:
         cleaned_prompt = prompt.strip()
         with open(file_path, 'a', encoding='utf-8') as file:
@@ -101,7 +116,6 @@ def append_to_prompt_txt(prompt, file_path):
         logging.info(f"Prompt in '{file_path}' gespeichert.")
     except Exception as e:
         logging.error(f"Fehler beim Schreiben in '{file_path}': {e}")
-
 
 def clean_csv(file_path):
     try:
@@ -128,19 +142,34 @@ def clean_csv(file_path):
     except Exception as e:
         logging.error(f"Fehler bei der Bereinigung der CSV-Datei '{file_path}': {e}")
 
-
 def generate_ollama_prompt(selected_anweisung, user_input, selected_model):
+    ollama_cmd = find_ollama_binary()
+    if not ollama_cmd:
+        logging.error("Ollama-CLI nicht gefunden.")
+        return None
+
     try:
-        client = ollama.Client()
-        prompt = f"{selected_anweisung.strip()}\n{user_input.strip()}"
-        response = client.generate(model=selected_model, prompt=prompt)
-        if 'response' in response:
-            generated_text = response['response'].strip()
+        prompt_text = f"{selected_anweisung.strip()}\n{user_input.strip()}"
+        result = subprocess.run(
+            [ollama_cmd, "run", selected_model, prompt_text],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=120
+        )
+        if result.returncode == 0:
+            generated_text = result.stdout.strip()
             if generated_text.endswith('\n.'):
                 generated_text = generated_text.replace('\n.', '').strip()
             generated_text = re.sub(r'^\"', '', generated_text)
             generated_text = re.sub(r'\"$', '', generated_text)
             return generated_text
+        else:
+            logging.error(f"Ollama-Fehler: {result.stderr}")
+            return None
+    except subprocess.TimeoutExpired:
+        logging.error("Ollama-Timeout bei der Generierung.")
+        return None
     except Exception as e:
-        logging.error(f"Fehler bei der Generierung des Textes: {e}")
+        logging.error(f"Unerwarteter Fehler: {e}")
         return None
