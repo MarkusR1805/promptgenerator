@@ -8,10 +8,10 @@ Install Ollama
 <http://ollama.com>
 
 My Favorite LLM for this program<br>
-llama3.2:3b
+llama3.2-vision:11b
 
 ```sh
-ollama pull llama3.2:3b
+ollama pull llama3.2-vision:11b
 ```
 
 <p align="center">
@@ -46,31 +46,6 @@ If the program does not start or an error message appears, be sure to execute th
 ```sh
 pip install -r requirements.txt
 ```
-
-> # Troubleshooting
-
-> If an installation does not work for whatever reason, but you have installed Python, you have the following option:
->
-> - start your terminal and type the following: cd
-> - install all the libraries listed below by hand
-> - pip install anyio==4.6.2.post1
-> - pip install certifi==2024.8.30
-> - etc.
-
-These Python libraries should be installed!
-
-- anyio==4.6.2.post1
-- certifi==2024.8.30
-- h11==0.14.0
-- httpcore==1.0.6
-- httpx==0.27.2
-- idna==3.10
-- ollama==0.4.3
-- sniffio==1.3.1
-- PyQt6==6.7.1
-- PyQt6-Qt6==6.7.3
-- PyQt6_sip==13.8.0
-- sniffio==1.3.1
 
 <h2>Programm start</h2>
 
