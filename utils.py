@@ -159,6 +159,7 @@ def generate_ollama_prompt(selected_anweisung, user_input, selected_model):
         )
         if result.returncode == 0:
             generated_text = result.stdout.strip()
+            generated_text = strip_reasoning_block(generated_text)
             if generated_text.endswith('\n.'):
                 generated_text = generated_text.replace('\n.', '').strip()
             generated_text = re.sub(r'^\"', '', generated_text)
@@ -173,3 +174,29 @@ def generate_ollama_prompt(selected_anweisung, user_input, selected_model):
     except Exception as e:
         logging.error(f"Unerwarteter Fehler: {e}")
         return None
+
+def strip_reasoning_block(text):
+    """
+    Entfernt Reasoning-Blöcke mit unterstützten Markierungen, z. B.:
+      - Thinking... ...done thinking.
+      - Think... ...end think.
+    Füge weitere Tupel zu `patterns` hinzu, um neue Formate zu unterstützen.
+    """
+
+    # Liste von (start_marker_regex, end_marker_regex)
+    # Jedes Muster wird nacheinander angewendet.
+    patterns = [
+        (r'^Thinking\.\.\.', r'^\.\.\.done thinking\.'),
+        (r'^Think\.\.\.', r'^\.\.\.end think\.'),
+        # Weitere Muster hier ergänzen, z. B.:
+        # (r'^Reasoning:', r'^End of reasoning\.'),
+    ]
+
+    cleaned = text
+    for start_pat, end_pat in patterns:
+        # Kombiniere zu einem vollständigen Muster: Start, dann beliebiger Inhalt, dann Ende
+        full_pattern = f'{start_pat}.*?{end_pat}'
+        # Entferne den Block (inkl. Zeilenumbrüche dazwischen)
+        cleaned = re.sub(full_pattern, '', cleaned, flags=re.MULTILINE | re.DOTALL)
+
+    return cleaned.strip()
