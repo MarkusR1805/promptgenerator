@@ -11,7 +11,7 @@ My Favorite LLM for this program<br>
 llama3.2-vision:11b
 
 ```sh
-ollama pull llama3.2-vision:11b
+ollama run llama3.2:3b-instruct-q8_0
 ```
 
 <p align="center">
