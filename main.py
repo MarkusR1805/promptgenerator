@@ -18,7 +18,7 @@ from utils import read_anweisungen, get_installed_models, save_to_csv, append_to
 
 # ===== Pfad-Logik für Nuitka + macOS App Bundle =====
 def get_resource_path(relative_path):
-    """Gibt den Pfad zu einer mitgelieferten Ressource zurück (z. B. anweisungen.txt)."""
+    """Gibt den Pfad zu einer mitgelieferten Ressource zurück (z.B. anweisungen.txt)."""
     if sys.platform == "darwin" and getattr(sys, "frozen", False):
         # Nuitka: sys.executable ist .../Promptgenerator.app/Contents/MacOS/main
         bundle_resources = Path(sys.executable).parent.parent / "Resources"
@@ -83,7 +83,7 @@ class App(QWidget):
         self.setFont(font)
 
     def initUI(self):
-        self.setWindowTitle(f'2025 / Promptgenerator ({__version__}) ')
+        self.setWindowTitle(f'2025 / Promptgenerator ({__version__}) 🍎')
         self.setFixedSize(800, 600)
 
         layout = QVBoxLayout()
