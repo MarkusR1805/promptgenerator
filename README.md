@@ -35,6 +35,7 @@ git clone https://github.com/MarkusR1805/promptgenerator.git
 <h2>Create python venv</h2>
 
 ```sh
+git clone https://github.com/MarkusR1805/promptgenerator.git
 python -m venv promptgenerator
 source promptgenerator/bin/activate
 cd promptgenerator
