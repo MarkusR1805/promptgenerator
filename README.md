@@ -1,7 +1,14 @@
 <div align=center><h1>Promptgenerator 2.5 with Ollama</h1></div>
 <p align="center">
-  <img src="bilder/prinz5.jpg" />
+  <img src="bilder/bild.png" />
+  <img src="bilder/prompt1.png" />
 </p>
+
+<p align="center">
+  <img src="bilder/prompt2_app.png" />
+  <img src="bilder/prompt2.png" />
+</p>
+
 ## This program now has a GUI with a button for the clipboard.
 
 Install Ollama
