@@ -21,10 +21,6 @@ llama3.2:3b-instruct-q8_0
 ollama pull llama3.2:3b-instruct-q8_0
 ```
 
-<p align="center">
-  <img src="bilder/bild2.png" />
-</p>
-
 Install Git
 <https://git-scm.com/downloads>
 
