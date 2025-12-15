@@ -21,19 +21,13 @@ llama3.2:3b-instruct-q8_0
 ollama pull llama3.2:3b-instruct-q8_0
 ```
 
-Install Git
-<https://git-scm.com/downloads>
+> Install Git
+> <https://git-scm.com/downloads>
 
-Install Python
-<https://www.python.org/downloads/>
+> Install Python
+> <https://www.python.org/downloads/>
 
-<h2>Clone Repository</h2>
-
-```sh
-git clone https://github.com/MarkusR1805/promptgenerator.git
-```
-
-<h2>Create python venv</h2>
+## Install, create python venv and start
 
 ```sh
 git clone https://github.com/MarkusR1805/promptgenerator.git
