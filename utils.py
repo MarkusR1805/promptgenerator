@@ -8,6 +8,14 @@ import shutil
 import logging
 from datetime import datetime
 
+def strip_ansi_codes(text: str) -> str:
+    """
+    Entfernt ANSI-Escape-Sequenzen (Farben, Cursor-Bewegungen,
+    Fortschrittsbalken-Steuerung) aus einem String.
+    """
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    return ansi_escape.sub('', text)
+
 def find_ollama_binary():
     """Findet den ollama-Befehl – auch ohne PATH."""
     candidates = [
@@ -150,24 +158,42 @@ def generate_ollama_prompt(selected_anweisung, user_input, selected_model):
 
     try:
         prompt_text = f"{selected_anweisung.strip()}\n{user_input.strip()}"
+
+        # Environment-Variablen setzen, um ANSI-Output zu minimieren
+        env = os.environ.copy()
+        env["NO_COLOR"] = "1"
+        env["TERM"] = "dumb"
+
         result = subprocess.run(
             [ollama_cmd, "run", selected_model, prompt_text],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            timeout=120
+            timeout=120,
+            stdin=subprocess.DEVNULL,  # ← Verhindert TTY-Erkennung
+            env=env                    # ← Custom Environment für weniger Formatierung
         )
+
         if result.returncode == 0:
             generated_text = result.stdout.strip()
+
+            # ANSI-Codes entfernen (Sicherheitsnetz)
+            generated_text = strip_ansi_codes(generated_text)
+
+            # Bestehende Bereinigungen beibehalten
             generated_text = strip_reasoning_block(generated_text)
             if generated_text.endswith('\n.'):
                 generated_text = generated_text.replace('\n.', '').strip()
             generated_text = re.sub(r'^\"', '', generated_text)
             generated_text = re.sub(r'\"$', '', generated_text)
+
             return generated_text
         else:
-            logging.error(f"Ollama-Fehler: {result.stderr}")
+            # Auch stderr bereinigen, falls Fehlermeldungen ANSI-Codes enthalten
+            cleaned_stderr = strip_ansi_codes(result.stderr)
+            logging.error(f"Ollama-Fehler: {cleaned_stderr}")
             return None
+
     except subprocess.TimeoutExpired:
         logging.error("Ollama-Timeout bei der Generierung.")
         return None
